@@ -1,0 +1,339 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#536b58">
+<meta name="description" content="适配手机、平板和电脑的新延世韩国语单词学习工具">
+<title>新延世韩国语1 · 单词管理</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;padding:18px;background:#f6f5f0;color:#30342f;
+font-family:Arial,"Microsoft YaHei",sans-serif}
+main{width:100%;max-width:920px;margin:auto}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+button{min-height:44px;touch-action:manipulation}
+button:disabled{opacity:.55;cursor:not-allowed}
+.speak-row{display:flex;justify-content:center;margin:0 0 10px}
+.speak-btn{width:auto;min-width:150px;padding:10px 16px;border-radius:999px;background:#e8efe8;color:#344b39;border:1px solid #d6e1d6}
+.notice{font-size:12px;color:#777;line-height:1.6}
+#question{margin-bottom:0}
+@media(min-width:760px){main{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:start}header{grid-column:1/-1}.card{margin:0 0 14px}.card:last-child{grid-column:1/-1}}
+@media(max-width:520px){body{padding:12px}h1{font-size:22px}.card{padding:15px;border-radius:14px}.row{flex-direction:column;gap:4px}.word{font-size:29px;padding:18px 4px}input,select,textarea,button{font-size:16px}.row button{margin-top:6px}}
+h1{font-size:25px;margin-bottom:5px}
+.sub,.muted{color:#777;font-size:13px}
+.card{background:white;border-radius:17px;padding:18px;margin:14px 0;
+box-shadow:0 3px 15px #00000008}
+label{display:block;font-size:14px;margin:10px 0 6px}
+input,select,textarea,button{font:inherit;width:100%;padding:12px;
+border-radius:10px;border:1px solid #ddd;background:white;color:#30342f}
+button{cursor:pointer;background:#536b58;color:white;border:0;margin-top:8px}
+button.secondary{background:#edf0eb;color:#344b39}
+button.danger{background:#f7e9e5;color:#863c30}
+.row{display:flex;gap:8px}
+.row>*{flex:1;min-width:0}
+.word{text-align:center;font-size:32px;font-weight:bold;padding:22px 0;overflow-wrap:anywhere}
+.stat{background:#f2f3ee;border-radius:12px;padding:12px;margin:8px 0}
+#feedback{line-height:1.8;white-space:pre-wrap}
+.small{font-size:12px;color:#777}
+</style>
+</head>
+<body>
+<main>
+<header><div><h1>🌱 新延世韩国语 1</h1>
+<p class="sub">我的专属词汇本 · 手机、平板、电脑通用</p></div></header>
+
+<div class="card">
+<h3>📚 选择学习范围</h3>
+<label>单元</label>
+<select id="unit"></select>
+<label>课次</label>
+<select id="lesson"></select>
+<div class="row">
+<button id="unitMode" class="secondary">练习整个单元</button>
+<button id="allMode" class="secondary">练习全部单词</button>
+</div>
+<p id="scopeInfo" class="muted"></p >
+</div>
+
+<div class="card">
+<h3>✍️ 开始背单词</h3>
+<label>练习模式</label>
+<select id="mode">
+<option value="write">中文 → 韩语默写</option>
+<option value="read">韩语 → 中文回忆</option>
+</select>
+<p id="progress" class="muted"></p >
+<div class="word" id="question">准备开始</div>
+<div class="speak-row"><button id="speakQuestion" class="speak-btn" type="button" aria-label="播放当前韩语单词发音">🔊 播放韩语发音</button></div>
+<input id="answer" placeholder="在这里输入答案" autocomplete="off">
+<button id="check">检查答案</button>
+<button id="next" class="secondary">下一题 →</button>
+<p id="feedback"></p >
+<div class="stat" id="stats">答对 0 题 · 错词 0 个</div>
+<div class="row">
+<button id="review">重练当前范围错词</button>
+<button id="reviewAll" class="secondary">重练全部错词</button>
+</div>
+</div>
+
+<div class="card">
+<h3>➕ 添加单词</h3>
+<label>添加到哪个单元</label>
+<select id="addUnit"></select>
+<label>添加到哪一课</label>
+<select id="addLesson"></select>
+<label>单词列表（每行一个，韩语,中文）</label>
+<textarea id="newwords" rows="5"
+placeholder="학생,学生&#10;학교,学校&#10;친구,朋友"></textarea>
+<p class="small">请使用英文逗号分隔韩语和中文。重复的韩语单词不会重复添加。</p >
+<button id="add">添加单词</button>
+<p id="addResult" class="muted"></p >
+</div>
+
+<div class="card">
+<h3>🗂️ 管理单元和课次</h3>
+<label>新单元名称</label>
+<input id="newUnit" placeholder="例如：第四单元">
+<button id="createUnit">创建单元</button>
+<label>选择单元，为它添加新课次</label>
+<select id="lessonUnit"></select>
+<label>新课次名称</label>
+<input id="newLesson" placeholder="例如：第四课">
+<button id="createLesson">添加课次</button>
+<p class="small">创建分类后，可以在上方选择对应单元和课次进行学习。</p >
+</div>
+
+<div class="card">
+<h3>📊 学习统计</h3>
+<div id="detailStats"></div>
+<button id="backup">导出词库备份</button>
+<label>从备份恢复词库</label>
+<input id="restoreFile" type="file" accept=".json,application/json">
+<p class="small">建议定期备份。恢复备份会替换当前词库和错词记录，请先保存当前数据。</p >
+<p class="notice">设备说明：同一个网页可在不同设备打开，但浏览器本地数据不会自动跨设备同步。请使用“导出词库备份”和“从备份恢复词库”在设备间迁移数据。</p>
+</div>
+</main>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY="vocabWords", WRONG="vocabWrong", META="vocabOrganizedV1";
+let units=[], words=[], wrong=[], stats={right:0,total:0};
+let list=[],index=0,checked=false,scope="lesson",currentWrongMode=false;
+
+function read(key,fallback){
+ try{
+  const v=localStorage.getItem(key);
+  return v===null?fallback:JSON.parse(v);
+ }catch(e){return fallback}
+}
+function save(){
+ try{
+  localStorage.setItem(KEY,JSON.stringify(words.map(w=>[w.ko,w.zh])));
+  localStorage.setItem(WRONG,JSON.stringify(wrong.map(w=>[w.ko,w.zh])));
+  localStorage.setItem(META,JSON.stringify({units,words,stats,wrong}));
+  localStorage.setItem("vocabStatsV1",JSON.stringify(stats));
+ }catch(e){console.warn("保存失败",e);}
+}
+function uniqueNames(a){return [...new Set(a)]}
+function init(){
+ const meta=read(META,null);
+ const oldWords=read(KEY,[]);
+ const oldWrong=read(WRONG,[]);
+ stats=read("vocabStatsV1",{right:0,total:0});
+ if(meta&&Array.isArray(meta.words)&&Array.isArray(meta.units)){
+  units=meta.units;words=meta.words;wrong=meta.words.filter(w=>w.wrong);
+  // 兼容备份中独立的错词列表
+  if(Array.isArray(meta.wrong))wrong=meta.wrong;
+  else wrong=oldWrong.map(x=>typeof x==="object"&&x.ko?x:
+    ({ko:x[0],zh:x[1],unit:"第一单元",lesson:"第一课"}));
+ }else{
+  units=[{name:"第一单元",lessons:["第一课"]}];
+  words=oldWords.map(x=>({
+   ko:Array.isArray(x)?x[0]:x.ko,
+   zh:Array.isArray(x)?x[1]:x.zh,
+   unit:"第一单元",lesson:"第一课"
+  }));
+  wrong=oldWrong.map(x=>({
+   ko:Array.isArray(x)?x[0]:x.ko,
+   zh:Array.isArray(x)?x[1]:x.zh,
+   unit:"第一单元",lesson:"第一课"
+  }));
+ }
+ if(!units.length)units=[{name:"第一单元",lessons:["第一课"]}];
+ units.forEach(u=>{if(!Array.isArray(u.lessons))u.lessons=["第一课"]});
+ words=words.map(w=>({...w,unit:w.unit||units[0].name,
+  lesson:w.lesson||units[0].lessons[0]}));
+ wrong=wrong.map(w=>({...w,unit:w.unit||units[0].name,
+  lesson:w.lesson||units[0].lessons[0]}));
+ if(!stats||typeof stats.right!=="number")stats={right:0,total:0};
+ renderSelectors();buildList();save();
+}
+function fillSelect(id,items,selected){
+ const el=$(id);el.innerHTML="";
+ items.forEach(item=>{
+  const o=document.createElement("option");o.value=item;o.textContent=item;
+  el.appendChild(o);
+ });
+ if(items.includes(selected))el.value=selected;
+}
+function renderSelectors(){
+ const names=units.map(u=>u.name);
+ const oldUnit=$("unit").value,oldAdd=$("addUnit").value,oldLU=$("lessonUnit").value;
+ fillSelect("unit",names,oldUnit||names[0]);
+ fillSelect("addUnit",names,oldAdd||names[0]);
+ fillSelect("lessonUnit",names,oldLU||names[0]);
+ refreshLessons("unit","lesson");
+ refreshLessons("addUnit","addLesson");
+}
+function refreshLessons(unitId,lessonId){
+ const u=units.find(x=>x.name===$(unitId).value)||units[0];
+ const previous=$(lessonId).value;
+ fillSelect(lessonId,u.lessons,previous||u.lessons[0]);
+}
+function getScopeWords(){
+ if(scope==="all")return [...words];
+ if(scope==="unit")return words.filter(w=>w.unit===$("unit").value);
+ return words.filter(w=>w.unit===$("unit").value&&w.lesson===$("lesson").value);
+}
+function buildList(){
+ currentWrongMode=false;
+ list=getScopeWords();index=0;show();
+}
+function show(){
+ checked=false;
+ $("answer").value="";$("answer").disabled=false;
+ $("check").disabled=false;$("feedback").textContent="";
+ const w=list[index];
+ if(!w){
+  $("question").textContent="这个范围还没有单词";
+  $("progress").textContent="可以先在下面添加词汇";
+  $("speakQuestion").disabled=true;
+  updateStats();return;
+ }
+ $("question").textContent=$("mode").value==="write"?w.zh:w.ko;
+ $("speakQuestion").disabled=false;
+ $("speakQuestion").textContent=$("mode").value==="read"?"🔊 播放当前单词发音":"🔊 显示答案后播放发音";
+ $("answer").placeholder=$("mode").value==="write"?"输入韩语拼写":"输入中文意思";
+ $("progress").textContent=`第 ${index+1} / ${list.length} 题 · ${w.unit} · ${w.lesson}`;
+ updateStats();
+}
+function updateStats(){
+ $("stats").textContent=`累计答对 ${stats.right} 题 · 错词 ${wrong.length} 个`;
+ const u=$("unit").value,l=$("lesson").value;
+ $("scopeInfo").textContent=`当前单元：${u} · 当前课次：${l}`;
+ $("detailStats").textContent=units.map(unit=>{
+  const us=words.filter(w=>w.unit===unit.name);
+  return `${unit.name}：${us.length} 个词，${unit.lessons.length} 课`;
+ }).join("\n");
+}
+function speakKorean(text){
+ const value=String(text||"").trim();
+ if(!value)return;
+ if(!("speechSynthesis" in window)||!("SpeechSynthesisUtterance" in window)){
+  alert("当前浏览器不支持语音朗读，请尝试更新浏览器或更换浏览器。");return;
+ }
+ window.speechSynthesis.cancel();
+ const utterance=new SpeechSynthesisUtterance(value);
+ utterance.lang="ko-KR";utterance.rate=0.85;utterance.pitch=1;
+ const voices=window.speechSynthesis.getVoices();
+ const koreanVoice=voices.find(v=>/^ko([_-]|$)/i.test(v.lang));
+ if(koreanVoice)utterance.voice=koreanVoice;
+ utterance.onerror=()=>{ $("feedback").textContent="如果没有声音，请检查设备音量，或在系统语音设置中安装韩语语音。"; };
+ window.speechSynthesis.speak(utterance);
+}
+$("speakQuestion").onclick=()=>{
+ const w=list[index];if(!w)return;
+ if($("mode").value==="read")speakKorean(w.ko);
+ else if(checked)speakKorean(w.ko);
+ else $("feedback").textContent="先提交答案并查看正确答案，再播放韩语发音。";
+};
+if("speechSynthesis" in window){window.speechSynthesis.getVoices();}
+function check(){
+ const w=list[index];if(!w||checked)return;
+ const expected=$("mode").value==="write"?w.ko:w.zh;
+ const actual=$("answer").value.trim().replace(/\s/g,"");
+ checked=true;stats.total++;
+ if($("mode").value==="write")$("speakQuestion").textContent="🔊 播放正确答案发音";
+ if(actual===expected.replace(/\s/g,"")){
+  stats.right++;$("feedback").textContent="✅ 回答正确！";
+ }else{
+  if(!wrong.some(x=>x.ko===w.ko&&x.unit===w.unit&&x.lesson===w.lesson)){
+   wrong.push({...w});
+  }
+  $("feedback").textContent=`❌ 正确答案：${expected}`;
+ }
+ $("answer").disabled=true;$("check").disabled=true;
+ save();updateStats();
+}
+$("check").onclick=check;
+$("answer").addEventListener("keydown",e=>{if(e.key==="Enter")check()});
+$("next").onclick=()=>{if(list.length){index=(index+1)%list.length;show()}};
+$("mode").onchange=show;
+$("unit").onchange=()=>{refreshLessons("unit","lesson");scope="lesson";buildList()};
+$("lesson").onchange=()=>{scope="lesson";buildList()};
+$("addUnit").onchange=()=>refreshLessons("addUnit","addLesson");
+$("lessonUnit").onchange=()=>{};
+$("unitMode").onclick=()=>{scope="unit";list=words.filter(w=>w.unit===$("unit").value);index=0;show()};
+$("allMode").onclick=()=>{scope="all";list=[...words];index=0;show()};
+$("review").onclick=()=>{
+ const selected=getScopeWords();
+ list=wrong.filter(w=>selected.some(s=>s.ko===w.ko&&s.unit===w.unit&&s.lesson===w.lesson));
+ currentWrongMode=true;index=0;show();
+};
+$("reviewAll").onclick=()=>{list=[...wrong];index=0;currentWrongMode=true;show()};
+$("add").onclick=()=>{
+ const unit=$("addUnit").value,lesson=$("addLesson").value;
+ let count=0,duplicates=0;
+ $("newwords").value.split(/\n/).forEach(line=>{
+  const p=line.split(","),ko=(p.shift()||"").trim(),zh=p.join(",").trim();
+  if(!ko||!zh)return;
+  if(words.some(w=>w.ko===ko&&w.unit===unit&&w.lesson===lesson)){duplicates++;return}
+  words.push({ko,zh,unit,lesson});count++;
+ });
+ save();renderSelectors();scope="lesson";$("unit").value=unit;
+ refreshLessons("unit","lesson");$("lesson").value=lesson;
+ buildList();
+ $("addResult").textContent=`添加 ${count} 个，跳过重复单词 ${duplicates} 个。`;
+ $("newwords").value="";
+};
+$("createUnit").onclick=()=>{
+ const name=$("newUnit").value.trim();
+ if(!name)return alert("请先输入单元名称");
+ if(units.some(u=>u.name===name))return alert("这个单元已经存在");
+ units.push({name,lessons:["第一课"]});$("newUnit").value="";
+ save();renderSelectors();$("unit").value=name;$("addUnit").value=name;
+ refreshLessons("unit","lesson");refreshLessons("addUnit","addLesson");
+ scope="lesson";buildList();
+};
+$("createLesson").onclick=()=>{
+ const name=$("newLesson").value.trim(),unitName=$("lessonUnit").value;
+ if(!name)return alert("请先输入课次名称");
+ const u=units.find(x=>x.name===unitName);
+ if(u.lessons.includes(name))return alert("这个课次已经存在");
+ u.lessons.push(name);$("newLesson").value="";
+ save();renderSelectors();$("unit").value=unitName;$("addUnit").value=unitName;
+ refreshLessons("unit","lesson");refreshLessons("addUnit","addLesson");
+ $("lesson").value=name;$("addLesson").value=name;scope="lesson";buildList();
+};
+$("backup").onclick=()=>{
+ const data={units,words,wrong,stats,version:1};
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="韩语词库备份.json";a.click();URL.revokeObjectURL(url);
+};
+$("restoreFile").onchange=async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{
+  const data=JSON.parse(await file.text());
+  if(!Array.isArray(data.units)||!Array.isArray(data.words))throw Error();
+  if(!confirm("恢复备份会替换当前词库，确定继续吗？"))return;
+  units=data.units;words=data.words;wrong=data.wrong||[];stats=data.stats||{right:0,total:0};
+  save();renderSelectors();buildList();alert("词库恢复成功");
+ }catch(err){alert("无法读取备份文件，请确认选择的是本网页导出的 JSON 文件。")}
+};
+init();
+</script>
+</body>
+</html>
